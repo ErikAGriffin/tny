@@ -1,9 +1,16 @@
 from flask import Flask, abort, redirect, request
 import redis as RedisConn
 import secrets
+from os import environ
+from dotenv import load_dotenv
+
+load_dotenv()
+for env_var in ['REDIS_HOST', 'REDIS_PORT', 'TNY_HOSTNAME']:
+    if not environ.get(env_var):
+        raise AssertionError(f"{env_var} environment variable must be set.\nPlease check your environment")
 
 app = Flask(__name__)
-redis = RedisConn.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+redis = RedisConn.Redis(host=environ.get('REDIS_HOST'), port=environ.get('REDIS_PORT'), db=0, decode_responses=True)
 
 @app.route("/")
 def index():
@@ -25,8 +32,10 @@ def create():
         url = request.get_json().get('url')
     if not url:
         abort(400)
-    url_hash = store_url(url)
-    return { 'short_code': url_hash }
+    url_hash = store_url(url.rstrip())
+    return {
+        'short_url': f"{environ.get('TNY_HOSTNAME')}/{url_hash}"
+    }
 
 @app.route("/<string:url_hash>")
 def resolve_url(url_hash):
