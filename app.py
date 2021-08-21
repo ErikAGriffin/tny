@@ -1,8 +1,9 @@
 from flask import Flask, abort, redirect, request
 import redis as RedisConn
-import secrets
 from os import environ
 from dotenv import load_dotenv
+import secrets
+import re
 
 load_dotenv()
 for env_var in ['REDIS_HOST', 'REDIS_PORT', 'TNY_HOSTNAME']:
@@ -23,6 +24,12 @@ def store_url(url):
             redis.set(url_hash, url)
             return url_hash
 
+def get_url(short_url):
+    prefix_regex = re.compile(f"(https?://)?{environ.get('TNY_HOSTNAME')}/+",re.I)
+    print(prefix_regex)
+    url_hash = prefix_regex.sub('', short_url)
+    return redis.get(url_hash)
+
 @app.route("/api/create", methods=['POST'])
 def create():
     url = None
@@ -36,6 +43,21 @@ def create():
     return {
         'short_url': f"{environ.get('TNY_HOSTNAME')}/{url_hash}"
     }
+
+@app.route("/api/get")
+def return_url():
+    short_url = None
+    if request.form:
+        short_url = request.form.get('url')
+    elif request.is_json:
+        short_url = request.get_json().get('url')
+    if not short_url:
+        abort(400)
+    long_url = get_url(short_url)
+    if not long_url:
+        abort(404)
+    return { 'original_url': long_url }
+
 
 @app.route("/<string:url_hash>")
 def resolve_url(url_hash):
