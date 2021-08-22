@@ -30,22 +30,25 @@ def get_url(short_url):
     url_hash = prefix_regex.sub('', short_url)
     return redis.get(url_hash)
 
-@app.route("/api/create", methods=['POST'])
+@app.route("/api/urls", methods=['POST'])
 def create():
     url = None
-    url_regex = re.compile(r"^(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)", re.I)
+    http_regex = re.compile(r"^https?://", re.I)
+    url_regex = re.compile(r"^(http(s)?://.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)", re.I)
     if request.form:
         url = request.form.get('url')
     elif request.is_json:
         url = request.get_json().get('url')
     if not url or not url_regex.match(url):
         abort(400)
+    if not http_regex.match(url):
+        url = "http://" + url
     url_hash = store_url(url.rstrip())
     return {
-        'short_url': f"{environ.get('TNY_HOSTNAME')}/{url_hash}"
+        'short_url': f"http://{environ.get('TNY_HOSTNAME')}/{url_hash}"
     }
 
-@app.route("/api/get")
+@app.route("/api/urls")
 def return_url():
     short_url = None
     if request.form:
