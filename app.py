@@ -33,11 +33,12 @@ def get_url(short_url):
 @app.route("/api/create", methods=['POST'])
 def create():
     url = None
+    url_regex = re.compile(r"^(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)", re.I)
     if request.form:
         url = request.form.get('url')
     elif request.is_json:
         url = request.get_json().get('url')
-    if not url:
+    if not url or not url_regex.match(url):
         abort(400)
     url_hash = store_url(url.rstrip())
     return {
