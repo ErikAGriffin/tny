@@ -1,9 +1,6 @@
 from flask import Blueprint, abort, redirect
 import redis as RedisConn
-from dotenv import load_dotenv
 from os import environ
-
-load_dotenv()
 
 main = Blueprint('main', __name__)
 

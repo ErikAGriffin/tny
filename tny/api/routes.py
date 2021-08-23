@@ -1,11 +1,8 @@
 from flask import Blueprint, abort, request
 import redis as RedisConn
-from dotenv import load_dotenv
 from os import environ
 import secrets
 import re
-
-load_dotenv()
 
 api = Blueprint('api', __name__)
 
