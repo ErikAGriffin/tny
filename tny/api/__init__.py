@@ -3,7 +3,6 @@ import secrets
 import re
 
 def create_api_blueprint(config, redis):
-    print('running create api')
     api = Blueprint('api', __name__)
 
     def store_url(url):
@@ -18,9 +17,6 @@ def create_api_blueprint(config, redis):
         url_hash = prefix_regex.sub('', short_url)
         return redis.get_url(url_hash)
 
-    # print('importing api routes')
-    # from . import routes
-    # ..did not work, trying inline
     @api.route("/urls", methods=['POST'])
     def create():
         url = None

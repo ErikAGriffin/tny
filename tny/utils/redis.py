@@ -14,13 +14,9 @@ class RedisClient:
         )
 
     def set_url(self, url_hash, url):
-        print("Setting url.")
         key = f"{self.__url_prefix}{url_hash}"
-        print(f"key: {key}")
         self._client.set(f"{self.__url_prefix}{url_hash}", url)
 
     def get_url(self, url_hash):
-        print("getting url")
         key = f"{self.__url_prefix}{url_hash}"
-        print(f"key:  {key}")
         return self._client.get(f"{self.__url_prefix}{url_hash}")

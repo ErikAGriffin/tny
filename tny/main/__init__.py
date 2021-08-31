@@ -10,9 +10,7 @@ def create_main_blueprint(config, redis):
 
     @main.route("/<string:url_hash>")
     def resolve_url(url_hash):
-        print(f"url hash: {url_hash}")
         url = redis.get_url(url_hash)
-        print(f"redis response: {url}")
         if url:
             return redirect(url)
         else:
