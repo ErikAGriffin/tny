@@ -1,29 +1,5 @@
-from flask import Blueprint, abort, request
-import redis as RedisConn
-from os import environ
-import secrets
+from flask import abort, request
 import re
-
-api = Blueprint('api', __name__)
-
-redis = RedisConn.Redis(
-    host=environ.get('REDIS_HOST'),
-    port=environ.get('REDIS_PORT'),
-    db=0,
-    decode_responses=True
-)
-
-def store_url(url):
-    while True:
-        url_hash = secrets.token_urlsafe(5)
-        if not redis.get(url_hash):
-            redis.set(url_hash, url)
-            return url_hash
-
-def get_url(short_url):
-    prefix_regex = re.compile(f"(https?://)?{environ.get('TNY_HOSTNAME')}/+",re.I)
-    url_hash = prefix_regex.sub('', short_url)
-    return redis.get(url_hash)
 
 @api.route("/urls", methods=['POST'])
 def create():
@@ -40,7 +16,7 @@ def create():
         url = "http://" + url
     url_hash = store_url(url.rstrip())
     return {
-        'short_url': f"http://{environ.get('TNY_HOSTNAME')}/{url_hash}"
+        'short_url': f"http://{config.TNY_HOSTNAME}/{url_hash}"
     }
 
 @api.route("/urls")
